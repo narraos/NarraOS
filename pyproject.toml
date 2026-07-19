@@ -1,0 +1,177 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "narraos"
+version = "0.1.0"
+description = "NarraOS -- Autonomous AI Media Operating System"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "NarraOS" }]
+
+# Core application dependencies only. Heavy media/ML dependencies (vision,
+# speech, vector search) are declared as the optional "media" extra below --
+# see the "media" group for why they're split out.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "langgraph>=0.2",
+    "pydantic>=2.8",
+    "pydantic-settings>=2.4",
+    "sqlalchemy[asyncio]>=2.0",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    "redis>=5.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Media generation / vision / speech / vector-search dependencies. Split out
+# of the base dependency list because several of these (openai-whisper in
+# particular) pull in very large transitive dependencies (e.g. torch) that
+# no code in this repository actually uses yet -- core/stages/image_generation,
+# voice_synthesis, etc. are empty packages as of Day 0. Install with
+# `pip install ".[media]"` once implementing those stages.
+media = [
+    "faiss-cpu>=1.8",
+    "openai-whisper>=20231117",
+    "ffmpeg-python>=0.2",
+    "moviepy>=1.0.3",
+    "opencv-python-headless>=4.10",
+]
+
+# Developer tooling: linting, formatting, typing, testing, dependency-boundary
+# enforcement (REPOSITORY_STRUCTURE.md §6.3).
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "black>=24.8",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "import-linter>=2.0",
+    "types-PyYAML>=6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/narraos"]
+
+# ---------------------------------------------------------------------------
+# Formatting
+# ---------------------------------------------------------------------------
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+# ---------------------------------------------------------------------------
+# Linting
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["narraos"]
+
+# ---------------------------------------------------------------------------
+# Typing -- full strict typing on core/, providers/, platforms/ per
+# DEVELOPER_HANDBOOK.md §6; everything else typed but not yet strict while
+# Core Infrastructure scaffolding fills in.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+namespace_packages = true
+explicit_package_bases = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = ["narraos.core.*", "narraos.providers.*", "narraos.platforms.*"]
+strict = true
+
+# ---------------------------------------------------------------------------
+# Testing
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src/narraos"]
+
+# ---------------------------------------------------------------------------
+# Dependency boundary enforcement -- encodes REPOSITORY_STRUCTURE.md §6.1/§6.2.
+# Run with `lint-imports` (installed via the dev extra).
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "narraos"
+
+[[tool.importlinter.contracts]]
+name = "Only providers/registry.py may import concrete provider implementations"
+type = "forbidden"
+source_modules = [
+    "narraos.core",
+    "narraos.platforms",
+    "narraos.memory",
+    "narraos.compliance",
+    "narraos.api",
+]
+forbidden_modules = [
+    "narraos.providers.llm.implementations",
+    "narraos.providers.image.implementations",
+    "narraos.providers.video.implementations",
+    "narraos.providers.tts.implementations",
+    "narraos.providers.stt.implementations",
+    "narraos.providers.storage.implementations",
+    "narraos.providers.embedding.implementations",
+    "narraos.providers.vector_store.implementations",
+    "narraos.providers.analytics.implementations",
+    "narraos.providers.publishing.implementations",
+]
+
+[[tool.importlinter.contracts]]
+name = "core/ never imports platforms/ (platform-agnostic core guarantee)"
+type = "forbidden"
+source_modules = ["narraos.core"]
+forbidden_modules = ["narraos.platforms"]
+
+[[tool.importlinter.contracts]]
+name = "common/ has no outbound dependency on any domain layer"
+type = "forbidden"
+source_modules = ["narraos.common"]
+forbidden_modules = [
+    "narraos.core",
+    "narraos.providers",
+    "narraos.platforms",
+    "narraos.memory",
+    "narraos.compliance",
+    "narraos.api",
+]
+
+[[tool.importlinter.contracts]]
+name = "Approximate layering per REPOSITORY_STRUCTURE.md §6.1"
+type = "layers"
+layers = [
+    "narraos.api",
+    "narraos.platforms",
+    "narraos.core",
+    "narraos.compliance",
+    "narraos.memory",
+    "narraos.providers",
+    "narraos.db",
+    "narraos.observability",
+    "narraos.config",
+    "narraos.common",
+]

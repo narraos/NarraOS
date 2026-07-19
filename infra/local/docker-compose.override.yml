@@ -1,0 +1,19 @@
+# Local development overrides -- not applied by default.
+# Apply with:
+#   docker compose -f docker-compose.yml -f infra/local/docker-compose.override.yml up
+#
+# Paths below are relative to this file's location (infra/local/), hence the
+# ../../ prefix back to the repository root.
+
+services:
+  api:
+    volumes:
+      - ../../src:/app/src:ro
+    environment:
+      NARRAOS_ENVIRONMENT: local
+
+  worker:
+    volumes:
+      - ../../src:/app/src:ro
+    environment:
+      NARRAOS_ENVIRONMENT: local

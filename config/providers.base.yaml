@@ -1,0 +1,93 @@
+# Layered provider configuration -- shared defaults across all environments.
+# See PROVIDER_ARCHITECTURE.md section 15. Environment-specific files
+# (providers.local.yaml / providers.production.yaml) are deep-merged on top
+# of this one by src/narraos/config/loader.py.
+#
+# Vendor selection below reflects free-tier / rate-limit research done
+# 2026-07-19 (see PROJECT_STATE.json "pending_decisions" history). These are
+# FOUNDER-CONFIRMED DEFAULTS, not yet backed by any provider implementation --
+# providers/*/implementations/ is still empty. Free-tier terms (rate limits,
+# commercial-use rights, data-training opt-out, and regional availability)
+# change frequently and were cut significantly across the industry in
+# December 2025 -- reverify each provider's current terms before Core
+# Infrastructure wires up its implementation, not just at config-write time.
+#
+# IMPORTANT -- commercial use / data privacy, read before relying on this:
+#   - Google AI Studio's free tier permits commercial use EXCEPT in the
+#     EU/EEA/UK/Switzerland, and free-tier inputs/outputs may be used by
+#     Google to improve its models. The UK is one of NarraOS's four target
+#     audience markets (CURRENT_STATE.md) -- that's about where VIEWERS are,
+#     not where the API call is billed from, but confirm this distinction
+#     with current Google terms before publishing monetized content built on
+#     the free tier.
+#   - ElevenLabs' free tier explicitly excludes commercial usage rights --
+#     deliberately NOT selected as default for this reason, independent of
+#     its small 10K-character/month allowance.
+#   - Always confirm current terms directly on the provider's own pricing/ToS
+#     page -- third-party "free tier roundup" articles are frequently stale
+#     or inconsistent with each other.
+
+llm:
+  default: google-gemini        # Google AI Studio (Gemini Flash / Flash-Lite) -- no card required,
+                                 # large context window, multimodal. Exact RPM/RPD figures fluctuate
+                                 # (cut 50-80% industry-wide in Dec 2025) -- verify at ai.google.dev
+                                 # before relying on a specific number.
+  fallback: groq-llama           # Groq -- no card required, very high throughput (LPU hardware),
+                                 # hosts Llama/Qwen/DeepSeek. Useful when Gemini's per-minute cap
+                                 # is hit; lower reasoning quality than Gemini for complex agent tasks.
+  per_stage_overrides:
+    compliance_review: google-gemini   # keep the most capable free-tier model on the highest-stakes agent
+    fact_verification: google-gemini
+
+image:
+  default: google-gemini-image   # "Nano Banana" (Gemini 2.5 Flash Image) via Google AI Studio.
+                                  # Some sources report free-tier image generation is web-UI-only,
+                                  # not available via the programmatic API -- CONFIRM API access
+                                  # specifically at ai.google.dev before depending on this.
+  fallback: pollinations         # Pollinations.ai -- genuinely free, no signup/API key required.
+                                  # Lower control/consistency than a keyed provider; fine as a
+                                  # zero-friction fallback, not recommended as primary for
+                                  # brand-consistent thumbnail/storyboard work.
+
+video:
+  default: null                  # Deliberately left unset. Free tiers for AI video *generation*
+                                  # specifically are thin-to-nonexistent among established providers
+                                  # as of this research pass. Revisit when core/stages/animation_generation
+                                  # is actually implemented -- Video Editing (assembly) already uses
+                                  # free, local FFmpeg/MoviePy and does not need this.
+
+tts:
+  default: piper-local            # Piper -- open-source, self-hosted, genuinely unlimited and free.
+                                   # Aligns with NarraOS's own "Local First" engineering principle
+                                   # (CURRENT_STATE.md) and has zero rate-limit exposure since it's
+                                   # not a network call at all.
+  fallback: google-cloud-tts        # ~1M standard characters/month free, commercial use permitted.
+                                     # Use if Piper's voice quality isn't sufficient for a given script.
+
+stt:
+  default: whisper-local           # Already approved (CURRENT_STATE.md) -- open-source, self-hosted,
+                                    # free, unlimited. No change; included here for completeness.
+
+storage:
+  default: cloudflare-r2            # 10GB free storage AND zero egress fees even beyond the free tier --
+                                     # the egress cost is normally what kills a video-hosting free tier,
+                                     # so this matters more than the raw GB figure. Verify current terms.
+  fallback: local-filesystem          # For local dev, per "Local First" -- no network dependency at all.
+
+embedding:
+  default: sentence-transformers-local  # Open-source, self-hosted embedding model. Genuinely free and
+                                          # unlimited since it's not an API call -- the strongest "free +
+                                          # high limit" answer of any category here. Pairs naturally with
+                                          # the already-local FAISS vector store.
+
+vector_store:
+  default: faiss   # unchanged -- current per CURRENT_STATE.md's approved stack; Qdrant planned for future scale
+
+analytics:
+  default: null    # YouTube Analytics is accessed via the YouTube Data API itself -- see
+                    # YOUTUBE_ADAPTER_ARCHITECTURE.md for the quota model. Not a separate vendor choice.
+
+publishing:
+  youtube: null     # PublishingProvider implementation choice, not a vendor choice -- YouTube Data
+                     # API is the only option and is already fully specified (quota, scheduling,
+                     # retries, degradation) in YOUTUBE_ADAPTER_ARCHITECTURE.md.

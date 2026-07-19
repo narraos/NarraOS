@@ -2,37 +2,38 @@
   "project": {
     "name": "NarraOS",
     "codename": "Autonomous AI Media OS",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "An autonomous AI Media Operating System that researches, generates, edits, packages, publishes, and continuously improves digital content through modular multi-agent workflows.",
     "owner": "Solo Founder",
     "repository": "NarraOS",
     "license": "MIT",
-    "status": "Architecture Finalization"
+    "status": "Architecture Approved for Core Infrastructure"
   },
 
   "metadata": {
-    "schema_version": "2.1",
+    "schema_version": "2.2",
     "created": "2026-07-18",
     "last_updated": "2026-07-18",
     "current_day": 0,
     "current_milestone": 0,
     "overall_progress": {
-      "percentage": 8,
+      "percentage": 10,
       "completed_phase": "Engineering Foundation"
     },
     "development_mode": "Documentation First"
   },
 
   "architecture": {
-    "status": "awaiting_final_review",
-    "frozen": false,
-    "approval_date": null
+    "status": "approved_for_core_infrastructure",
+    "frozen": true,
+    "approval_date": "2026-07-18",
+    "certificate_ref": "ARCHITECTURE_APPROVAL_CERTIFICATE.md"
   },
 
   "current_phase": {
     "id": "phase_0",
     "name": "Engineering Foundation",
-    "status": "awaiting_final_approval"
+    "status": "complete"
   },
 
   "engineering_principles": {
@@ -48,27 +49,19 @@
   },
 
   "tech_stack": {
-    "language": {
-      "python": "3.12"
-    },
+    "language": { "python": "3.12" },
     "backend": "FastAPI",
     "workflow": "LangGraph",
     "validation": "Pydantic",
     "database": "PostgreSQL",
     "cache": "Redis",
-    "vector_database": {
-      "current": "FAISS",
-      "future": "Qdrant"
-    },
+    "vector_database": { "current": "FAISS", "future": "Qdrant" },
     "containerization": "Docker",
     "testing": "pytest",
     "formatter": "Black",
     "linter": "Ruff",
     "speech_to_text": "Whisper",
-    "video_processing": [
-      "FFmpeg",
-      "MoviePy"
-    ],
+    "video_processing": ["FFmpeg", "MoviePy"],
     "vision": "OpenCV"
   },
 
@@ -80,6 +73,7 @@
     "video_generation": "Pluggable",
     "storage": "Pluggable",
     "embedding": "Pluggable",
+    "vector_store": "Pluggable",
     "analytics": "Pluggable",
     "publisher": "Pluggable"
   },
@@ -87,7 +81,7 @@
   "confirmed_decisions": [
     "Python-first architecture",
     "FastAPI backend",
-    "LangGraph orchestration",
+    "LangGraph orchestration (validation vs. human-checkpoint gating and crash recovery tracked as ADR-0001, first Core Infrastructure task)",
     "Documentation-first workflow",
     "Repository is project memory",
     "Platform-agnostic architecture",
@@ -100,104 +94,50 @@
   ],
 
   "pending_decisions": [
-    "Final image generation provider",
-    "Final TTS provider",
     "Final deployment target",
     "Monitoring and observability stack"
   ],
+  "pending_decisions_are_blocking": false,
+  "provider_selections": {
+    "note": "Founder-selected 2026-07-19, optimizing for free-of-cost + high rate limits, recorded in config/providers.base.yaml. Config only -- providers/*/implementations/ is empty; these become real once Core Infrastructure builds the provider implementations. Free-tier terms shift often (industry-wide cuts in Dec 2025) and carry commercial-use/regional caveats -- see comments in config/providers.base.yaml before implementing.",
+    "llm": { "default": "google-gemini", "fallback": "groq-llama" },
+    "image": { "default": "google-gemini-image", "fallback": "pollinations" },
+    "video": { "default": null, "note": "thin free-tier landscape for AI video generation; deferred" },
+    "tts": { "default": "piper-local", "fallback": "google-cloud-tts" },
+    "stt": { "default": "whisper-local", "note": "already approved, self-hosted, unchanged" },
+    "storage": { "default": "cloudflare-r2", "fallback": "local-filesystem" },
+    "embedding": { "default": "sentence-transformers-local", "note": "self-hosted, no rate limit at all" }
+  },
 
   "documents": {
-    "DEVELOPER_HANDBOOK.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "PROJECT_ARCHITECTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "ROADMAP.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "AI_CONTEXT.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "CURRENT_STATE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "PROJECT_STATE.json": {
-      "status": "approved",
-      "version": "2.1"
-    },
-    "DAILY_DEVELOPMENT_PLAN.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "PROVIDER_ARCHITECTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "MEMORY_ARCHITECTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "COMPLIANCE_ARCHITECTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "AGENT_SPECIFICATIONS.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "REPOSITORY_STRUCTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "PLUGIN_ARCHITECTURE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    },
-    "SCHEMA_REFERENCE.md": {
-      "status": "approved",
-      "version": "1.0.0"
-    }
+    "DEVELOPER_HANDBOOK.md": { "status": "approved", "version": "1.0.0", "note": "Repo structure section (§3) superseded by REPOSITORY_STRUCTURE.md" },
+    "PROJECT_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0", "note": "Layer 1 diagram amended by MEMORY_ARCHITECTURE.md §4" },
+    "ROADMAP.md": { "status": "approved", "version": "1.0.0" },
+    "AI_CONTEXT.md": { "status": "approved", "version": "1.1.0", "note": "Reading order reconciled to cover all specification documents" },
+    "CURRENT_STATE.md": { "status": "approved", "version": "1.0.0" },
+    "PROJECT_STATE.json": { "status": "approved", "version": "2.2" },
+    "DAILY_DEVELOPMENT_PLAN.md": { "status": "approved", "version": "1.0.0" },
+    "DOCUMENTATION_STRUCTURE.md": { "status": "approved", "version": "1.0.0" },
+    "ARCHITECTURE_APPROVAL_REPORT.md": { "status": "approved", "note": "First-pass review; all critical gaps closed by subsequent documents" },
+    "PROVIDER_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0" },
+    "MEMORY_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0" },
+    "COMPLIANCE_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0" },
+    "AGENT_SPECIFICATIONS.md": { "status": "approved", "version": "1.0.0" },
+    "REPOSITORY_STRUCTURE.md": { "status": "approved", "version": "1.0.0" },
+    "PLUGIN_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0" },
+    "SCHEMA_REFERENCE.md": { "status": "approved", "version": "1.0.0", "note": "Initial — core envelope schemas only; domain schemas added during implementation" },
+    "YOUTUBE_ADAPTER_ARCHITECTURE.md": { "status": "approved", "version": "1.0.0" },
+    "ARCHITECTURE_APPROVAL_CERTIFICATE.md": { "status": "approved", "version": "1.0.0" }
   },
 
   "project_phases": {
-    "phase_0": {
-      "name": "Engineering Foundation",
-      "status": "awaiting_final_approval"
-    },
-    "phase_1": {
-      "name": "Repository Foundation",
-      "status": "not_started"
-    },
-    "phase_2": {
-      "name": "Core Infrastructure",
-      "status": "not_started"
-    },
-    "phase_3": {
-      "name": "Research Engine",
-      "status": "not_started"
-    },
-    "phase_4": {
-      "name": "Story Intelligence",
-      "status": "not_started"
-    },
-    "phase_5": {
-      "name": "Media Generation",
-      "status": "not_started"
-    },
-    "phase_6": {
-      "name": "Publishing Pipeline",
-      "status": "not_started"
-    },
-    "phase_7": {
-      "name": "Analytics & Learning",
-      "status": "not_started"
-    }
+    "note": "Reconciled to ROADMAP.md's authoritative phase structure during final review — a previous version of this file described a different, conflicting 8-phase engine-by-engine breakdown that was never reflected in ROADMAP.md itself. ROADMAP.md is authoritative for phase sequencing; this object mirrors it, it does not define its own.",
+    "phase_0": { "name": "Engineering Foundation", "status": "complete" },
+    "phase_1": { "name": "Single-Stage Proof, Manual Pipeline (MVP-0)", "status": "not_started" },
+    "phase_2": { "name": "Orchestrated Pipeline, Supervised Autonomy (MVP-1)", "status": "not_started" },
+    "phase_3": { "name": "Feedback Loop & Trust-Based Autonomy", "status": "not_started" },
+    "phase_4": { "name": "Multi-Platform Expansion", "status": "not_started" },
+    "phase_5": { "name": "Scale, Team & Monetization", "status": "not_started" }
   },
 
   "core_modules": {
@@ -207,6 +147,8 @@
     "database": "not_started",
     "memory": "not_started",
     "providers": "not_started",
+    "plugins": "not_started",
+    "compliance": "not_started",
     "agents": "not_started",
     "workflow_engine": "not_started",
     "research_engine": "not_started",
@@ -221,17 +163,16 @@
   },
 
   "platform_adapters": {
-    "youtube": "planned",
-    "instagram": "planned",
-    "tiktok": "planned",
-    "x": "planned",
-    "facebook": "planned"
+    "youtube": { "status": "planned", "note": "Constraints, quota, scheduling, retry, degradation fully specified in YOUTUBE_ADAPTER_ARCHITECTURE.md" },
+    "instagram": { "status": "planned" },
+    "tiktok": { "status": "planned" },
+    "x": { "status": "planned" },
+    "facebook": { "status": "planned" }
   },
 
   "development_status": {
     "repository_created": false,
     "folder_structure_created": false,
-    "requirements_created": false,
     "pyproject_created": false,
     "docker_initialized": false,
     "git_initialized": false,
@@ -241,13 +182,13 @@
 
   "current_task": {
     "day": 0,
-    "title": "Final Architecture Approval",
-    "status": "in_progress"
+    "title": "Architecture approved — Repository Initialization",
+    "status": "ready_to_start"
   },
 
   "next_task": {
     "day": 0,
-    "title": "Freeze architecture and begin Repository Initialization (Day 0)"
+    "title": "Scaffold repository per REPOSITORY_STRUCTURE.md, then begin Core Infrastructure milestone starting with ADR-0001 (validate LangGraph checkpointing against human-checkpoint gating and crash-recovery requirements)"
   },
 
   "known_blockers": [],

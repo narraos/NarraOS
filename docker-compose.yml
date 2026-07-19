@@ -1,0 +1,64 @@
+# NarraOS local Foundation Services + application containers.
+# Apply local dev overrides with:
+#   docker compose -f docker-compose.yml -f infra/local/docker-compose.override.yml up
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: narraos
+      POSTGRES_PASSWORD: narraos
+      POSTGRES_DB: narraos
+    ports:
+      - "5432:5432"
+    volumes:
+      - narraos_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U narraos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    # No runnable API entrypoint yet -- src/narraos/api/ is Phase 2+ per
+    # DEVELOPER_HANDBOOK.md §4. This service builds and starts the container;
+    # see infra/docker/Dockerfile.api for the placeholder command.
+
+  worker:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # No runnable worker entrypoint yet -- pipeline orchestration (core/pipeline/)
+    # is Phase 1+ per ROADMAP.md.
+
+volumes:
+  narraos_postgres_data:

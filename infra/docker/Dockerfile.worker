@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY src ./src
+
+RUN pip install --upgrade pip \
+    && pip install .
+
+RUN python -c "import narraos; print('narraos package imports cleanly')"
+
+# No runnable worker entrypoint yet -- pipeline orchestration (core/pipeline/)
+# is Phase 1+ per ROADMAP.md. This placeholder command keeps the image
+# runnable and self-explanatory until that entrypoint exists.
+CMD ["python", "-c", "print('NarraOS worker image built successfully. No entrypoint yet -- pipeline orchestration is Phase 1+.')"]
