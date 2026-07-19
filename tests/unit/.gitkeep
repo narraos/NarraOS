@@ -1,0 +1,3 @@
+# Unit tests, mirrors src/narraos/ path-for-path as source files are added.
+# This file exists only to keep this otherwise-empty directory tracked in git.
+# Safe to delete once real content is added to this folder.

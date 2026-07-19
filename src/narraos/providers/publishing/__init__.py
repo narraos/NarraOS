@@ -1,0 +1,1 @@
+"""PublishingProvider interface and implementations."""

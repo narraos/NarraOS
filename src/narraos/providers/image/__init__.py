@@ -1,0 +1,1 @@
+"""ImageProvider interface and implementations."""

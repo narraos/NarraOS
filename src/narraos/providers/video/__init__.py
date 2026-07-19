@@ -1,0 +1,1 @@
+"""VideoProvider interface and implementations."""

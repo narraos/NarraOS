@@ -1,0 +1,1 @@
+"""Asset Packaging stage."""
